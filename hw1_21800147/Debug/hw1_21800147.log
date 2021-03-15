@@ -1,0 +1,5 @@
+﻿  LoadShaders.cpp
+  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw1_21800147\main.cpp(22,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  코드를 생성하고 있습니다...
+  hw1_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\hw1_21800147\Debug\hw1_21800147.exe
