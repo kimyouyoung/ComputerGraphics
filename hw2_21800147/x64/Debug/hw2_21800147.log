@@ -1,0 +1,40 @@
+﻿  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(28,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(57,37): warning C4267: '인수': 'size_t'에서 'GLsizei'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(66,70): warning C4267: '인수': 'size_t'에서 'GLuint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(67,70): warning C4267: '인수': 'size_t'에서 'GLuint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(104,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\main.cpp(105,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+LoadShaders.obj : error LNK2019: __imp___glewAttachShaderLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewCompileShaderLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewCreateProgramLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewCreateShaderLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewDeleteShaderLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewGetProgramInfoLogLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewGetProgramivLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewGetShaderInfoLogLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewGetShaderivLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewLinkProgramLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+LoadShaders.obj : error LNK2019: __imp___glewShaderSourceLoadShaders 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glewInitmain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glewGetErrorStringmain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutInitWindowSizemain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutInitDisplayModemain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutMainLoopmain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutPostRedisplay"void __cdecl keyboard(unsigned char,int,int)" (?keyboard@@YAXEHH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutKeyboardFuncmain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp_glutDisplayFuncmain 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glutInitWithExitglutInit_ATEXIT_HACK 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glutCreateWindowWithExitglutCreateWindow_ATEXIT_HACK 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewBindBuffer"void __cdecl bind_buffer(unsigned int,class std::vector<float,class std::allocator<float> > &,int,char const *,int)" (?bind_buffer@@YAXIAEAV?$vector@MV?$allocator@M@std@@@std@@HPEBDH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewBufferData"void __cdecl bind_buffer(unsigned int,class std::vector<float,class std::allocator<float> > &,int,char const *,int)" (?bind_buffer@@YAXIAEAV?$vector@MV?$allocator@M@std@@@std@@HPEBDH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewGenBuffers"void __cdecl init(void)" (?init@@YAXXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewEnableVertexAttribArray"void __cdecl bind_buffer(unsigned int,class std::vector<float,class std::allocator<float> > &,int,char const *,int)" (?bind_buffer@@YAXIAEAV?$vector@MV?$allocator@M@std@@@std@@HPEBDH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewGetAttribLocation"void __cdecl bind_buffer(unsigned int,class std::vector<float,class std::allocator<float> > &,int,char const *,int)" (?bind_buffer@@YAXIAEAV?$vector@MV?$allocator@M@std@@@std@@HPEBDH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewUseProgram"int __cdecl build_program(void)" (?build_program@@YAHXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewVertexAttribPointer"void __cdecl bind_buffer(unsigned int,class std::vector<float,class std::allocator<float> > &,int,char const *,int)" (?bind_buffer@@YAXIAEAV?$vector@MV?$allocator@M@std@@@std@@HPEBDH@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewBindVertexArray"void __cdecl display(void)" (?display@@YAXXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+main.obj : error LNK2019: __imp___glewGenVertexArrays"void __cdecl init(void)" (?init@@YAXXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+C:\Users\user\Desktop\ComputerGraphics\freeglut\lib\freeglut.lib : warning LNK4272: 'x86' 라이브러리 컴퓨터 종류가 'x64' 대상 컴퓨터 종류와 충돌합니다.
+C:\Users\user\Desktop\ComputerGraphics\glew-2.1.0\lib\Release\Win32\glew32.lib : warning LNK4272: 'x86' 라이브러리 컴퓨터 종류가 'x64' 대상 컴퓨터 종류와 충돌합니다.
+C:\Users\user\Desktop\ComputerGraphics\hw2_21800147\x64\Debug\hw2_21800147.exe : fatal error LNK1120: 30개의 확인할 수 없는 외부 참조입니다.
