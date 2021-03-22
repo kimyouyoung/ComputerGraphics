@@ -12,7 +12,7 @@ GLuint VertexArrays[2];
 GLuint Buffers[2][2];
 GLuint active_vao = 0; //index for the active vertex array object
 GLvec vertices[2]; // 2d vertex list
-GLvec colors[2]; // vertex color (r,g,b) list
+GLvec colors[3]; // vertex color (r,g,b) list
 
 void keyboard(unsigned char key, int x, int y);
 void display();
@@ -73,6 +73,8 @@ void init()
 		bind_buffer(Buffers[i][0], vertices[i], program, "vPosition", 2);
 		bind_buffer(Buffers[i][1], colors[i], program, "vColor", 3);
 	}
+    // share buffer
+    // generate color buffer
 }
 
 int build_program()
