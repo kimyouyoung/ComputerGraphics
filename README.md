@@ -3,8 +3,18 @@
 ### HW1
 Make two triangles
 
-![21800147_result](https://user-images.githubusercontent.com/47981169/112271753-a97abc00-8cbe-11eb-9840-8266c1bf095e.PNG)
+![rect](https://user-images.githubusercontent.com/47981169/112272170-2c037b80-8cbf-11eb-8294-8f9fc9c6096c.JPG)
 
 
 ### HW2
 Alternating three VAOs
+share buffer object(vertex position): 1(red circle), 3(blue circle)
+
+press keyboard '1'
+![red_circle](https://user-images.githubusercontent.com/47981169/112272208-3b82c480-8cbf-11eb-8bce-962f6e1d3aae.JPG)
+
+press keyboard '2'
+![yellow_rect](https://user-images.githubusercontent.com/47981169/112272209-3b82c480-8cbf-11eb-91f7-53d49e226fdf.JPG)
+
+press keyboard '3'
+![blue_circle](https://user-images.githubusercontent.com/47981169/112272207-3a519780-8cbf-11eb-9ce3-01153a73ad6a.JPG)
