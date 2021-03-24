@@ -89,8 +89,8 @@ void init()
 	glBindVertexArray(VertexArrays[2]);
 	share_buffer(Buffers[0][0], program, "vPosition", 2);
     // generate color buffer
-	glGenBuffers(2, Buffers[2]);
-	bind_buffer(Buffers[2][1], colors[2], program, "vColor", 3);
+	glGenBuffers(1, Buffers[2]);
+	bind_buffer(Buffers[2][0], colors[2], program, "vColor", 3);
 }
 
 int build_program()
