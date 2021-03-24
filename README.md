@@ -1,12 +1,12 @@
 # ComputerGraphics
 
-### HW1
+### <HW1>
 Make two triangles
 
 ![rect](https://user-images.githubusercontent.com/47981169/112272170-2c037b80-8cbf-11eb-8294-8f9fc9c6096c.JPG)
 
 
-### HW2
+### <HW2>
 Alternating three VAOs
 
 share buffer object(vertex position): 1(red circle), 3(blue circle)
