@@ -16,8 +16,8 @@ GLfloat vertices[NumVertices][2] = {
    {-0.90f, 0.85f}, {0.90f, -0.85f},
    {0.90f, 0.90f}, {-0.85f, 0.90f} };
 
-GLuint program;
 GLuint Buffers[1], VertexArrays[1];
+GLuint program;
 
 void init();
 void display();
@@ -93,6 +93,7 @@ void display()
     T = scale(T, vec3(0.5f));
     GLuint location = glGetUniformLocation(program, "T");
     glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(T));
+
     // Draw triangles
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
     // Forces the execution of OpenGL commands in finite time.
