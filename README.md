@@ -3,8 +3,7 @@
 ### HW1
 Make two triangles
 
-<img src="https://user-images.githubusercontent.com/47981169/112272170-2c037b80-8cbf-11eb-8294-8f9fc9c6096c.JPG" width = "100" height="100">
-![rect](https://user-images.githubusercontent.com/47981169/112272170-2c037b80-8cbf-11eb-8294-8f9fc9c6096c.JPG){: width="100" height="100"}
+<img src="https://user-images.githubusercontent.com/47981169/112272170-2c037b80-8cbf-11eb-8294-8f9fc9c6096c.JPG" width = "200" height="200">
 
 
 ### HW2
