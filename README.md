@@ -11,7 +11,7 @@ Alternating three VAOs
 
 share buffer object(vertex position): 1(red circle), 3(blue circle)
 
-**press keyboard '1'** : red circle 　　
+　**press keyboard '1'** : red circle 　　
 **press keyboard '2'** : yellow rectangle 　　
 **press keyboard '3'** : blue circle
 
