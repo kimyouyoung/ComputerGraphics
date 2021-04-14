@@ -27,8 +27,8 @@ A Simple Transformation with GLM
 ### HW4
 3D Cube Transformation & Color Conversion
 
-　**press keyboard '1'** : original(random) colors 3D cube　　
-　**press keyboard '2'** : grayscale colors 3D cube　　
+**press keyboard '1'** : original(random) colors 3D cube　　
+**press keyboard '2'** : grayscale colors 3D cube　　
 **press keyboard '3'** : complementary colors 3D cub
 
 <img src="https://user-images.githubusercontent.com/47981169/114693775-e6cde900-9d54-11eb-849b-72397036c1c7.JPG" width = "250" height="250"> 　 <img src="https://user-images.githubusercontent.com/47981169/114693780-e897ac80-9d54-11eb-88c5-03c428f73149.JPG" width = "250" height="250"> 　 <img src="https://user-images.githubusercontent.com/47981169/114693869-f8af8c00-9d54-11eb-8edb-82993008b8f9.JPG" width = "250" height="250">
