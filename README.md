@@ -39,7 +39,7 @@ A Simple Transformation with GLM
 ### HW5
 To load simple OBJ files and render them as white wireframes
 
-　**press keyboard '1'** : draw the house.　
+**press keyboard '1'** : draw the house.　
 　**press keyboard '2'** : draw the sphere. 　
 **press keyboard '3'** : draw the teapot.
 
