@@ -44,3 +44,13 @@ To load simple OBJ files and render them as white wireframes
 **press keyboard '3'** : draw the teapot.
 
 <img src="https://user-images.githubusercontent.com/47981169/114694400-75426a80-9d55-11eb-8d05-7e911e529d04.png" width = "250" height="250"> 　 <img src="https://user-images.githubusercontent.com/47981169/114694408-770c2e00-9d55-11eb-86d0-d1171c498823.png" width = "250" height="250"> 　 <img src="https://user-images.githubusercontent.com/47981169/114694414-77a4c480-9d55-11eb-8203-d89cadc533f7.png" width = "250" height="250">
+
+### HW6
+Solar System (Sun, Earth, Moon) with point, wireframe and a colored object.
+
+**press keyboard 'v'** : draw with points(vertices).　
+　**press keyboard 'w'** : draw with wireframe. 　
+**defalut** : draw with a colored object.
+
+<img src="https://user-images.githubusercontent.com/47981169/118084072-00695b80-b3fb-11eb-99f5-730c88b4d828.PNG" width = "250" height="250"> 　  　  　  　  <img src="https://user-images.githubusercontent.com/47981169/118084294-6eae1e00-b3fb-11eb-94a9-c47f4968cd1b.PNG" width = "250" height="250"> 　  　  　  　  <img src="https://user-images.githubusercontent.com/47981169/118084318-7a99e000-b3fb-11eb-8245-2720ed6e9123.PNG" width = "250" height="250">
+
