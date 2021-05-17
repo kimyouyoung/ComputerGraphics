@@ -2,7 +2,7 @@
 
 in vec4 fColor;
 out vec4 FragColor;
-layout(location=2) uniform int draw_mode;
+layout(location=4) uniform int draw_mode;
 
 void main()
 {

@@ -15,40 +15,41 @@ using namespace glm;
 typedef std::vector<GLfloat> GLvec;
 typedef std::vector<size_t> GLsvec;
 
-const GLuint num_of_model = 3;
-
-GLvec vertices[num_of_model];
-GLvec colors[num_of_model];
+const GLuint num_of_model = 6;
 
 GLuint vao[num_of_model];
 GLuint vbo[num_of_model][2];
-GLvec vtx_pos, vtx_clrs;
+GLvec vtx_pos[num_of_model], vtx_clrs[num_of_model];
 GLuint element_buffs[2];
+GLuint cylinder_element_buffs[3];
 GLsvec idx_list[2];
+GLsvec side_idx, top_idx, bottom_idx;
+GLsvec* cy_idx_list[] = {&side_idx, &top_idx, &bottom_idx};
 
 bool show_wireframes = false;
 bool show_vertices = false;
+bool orth = false;
+bool pers = false;
 int program;
-int projection_mode = 0;
+int projection_mode = 1;
 
 void keyboard(unsigned char key, int x, int y);
 void display();
-void init();
+void init(int program);
 int build_program();
 void bind_buffer(GLuint buffer, GLvec& vec, int program,
 	const GLchar* attri_name, GLint attri_size);
 mat4 parallel(double r, double aspect, double n, double f);
 
-
-void get_color_3d_by_pos(GLvec& c, GLvec& p, GLfloat offset);
+void get_color_3d_by_pos(GLvec& c, GLvec& p);
 void get_cube_3d(GLvec& p, GLfloat lx, GLfloat ly, GLfloat lz);
-void draw_cube(const GLfloat* trans_mat);
+void draw_cube(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
 void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba);
-void draw_sphere(const GLfloat* trans_mat);
+void draw_sphere(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* Pt);
 void get_cone_3d(GLvec& p, GLsvec& side_idx, GLsvec& botton_idx, GLfloat radius, GLfloat height, GLint n);
-void draw_cone(const GLfloat* trans_mat);
+void draw_cone(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
 void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom_idx, GLfloat radius, GLfloat height, GLint n);
-void draw_cylinder(const GLfloat* trans_mat);
+void draw_cylinder(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
 void get_tours_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh);
 void draw_tours(const GLfloat* trans_mat);
 
@@ -81,7 +82,7 @@ void main(int argc, char** argv)
 	// initialize and set the basic window
 	glutInitDisplayMode(GLUT_RGBA);
 	glutInitWindowSize(512, 512);
-	glutCreateWindow("Solar System");
+	glutCreateWindow("Drawing Primitives");
 
 	// initialize GLEW to load OpenGL extensions
 	GLenum err = glewInit();
@@ -90,7 +91,8 @@ void main(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	init();
+	program = build_program();
+	init(program);
 	// register a display callback function (When rendering is required in openGL)
 	glutDisplayFunc(display);
 
@@ -106,17 +108,22 @@ void keyboard(unsigned char key, int x, int y)
 	switch (key) {
 		// assign to a according to the number received on the keyboard.
 		// 1: cube, 2: sphere, 3: cone, 4: cylinder, 5:tours, 6: composite model
-		case '1': projection_mode = 1; glutPostRedisplay(); break;
-		case '2': projection_mode = 2; glutPostRedisplay(); break;
-		case '3': projection_mode = 3; glutPostRedisplay(); break;
-		case '4': projection_mode = 4; glutPostRedisplay(); break;
-		case '5': projection_mode = 5; glutPostRedisplay(); break;
-		case '6': projection_mode = 6; glutPostRedisplay(); break;
+	case '1': projection_mode = 1; glutPostRedisplay(); break;
+	case '2': projection_mode = 2; glutPostRedisplay(); break;
+	case '3': projection_mode = 3; glutPostRedisplay(); break;
+	case '4': projection_mode = 4; glutPostRedisplay(); break;
+	case '5': projection_mode = 5; glutPostRedisplay(); break;
+	case '6': projection_mode = 6; glutPostRedisplay(); break;
 
 		// w: wireframe, v: vertices, c: colored object
-		case 'w': show_wireframes = true; show_vertices = false; glutPostRedisplay(); break;
-		case 'v': show_vertices = true; show_wireframes = false; glutPostRedisplay(); break;
-		case 'c': show_vertices = false; show_wireframes = false; glutPostRedisplay(); break;
+	case 'w': show_wireframes = true; show_vertices = false; glutPostRedisplay(); break;
+	case 'v': show_vertices = true; show_wireframes = false; glutPostRedisplay(); break;
+	case 'c': show_vertices = false; show_wireframes = false; glutPostRedisplay(); break;
+
+		// o: orthographic, p: perspective
+	case 'o': orth = true; pers = false; glutPostRedisplay(); break;
+	case 'p': pers = true; orth = false; glutPostRedisplay(); break;
+
 	}
 }
 
@@ -126,43 +133,34 @@ void display()
 
 	// multiply 0.001f and time to set the angle.
 	GLfloat theta = 0.001f * clock();
-	// multiply 0.003f and time to set the angle. (for moon: more faster than earth and sun)
-	GLfloat theta2 = 0.003f * clock();
 
 	// bind vertex buffers to be referenced by vao.(each sun, earth, and moon vao)
-	for (int i = 0; i < num_of_model; ++i)
-		glBindVertexArray(vao[i]);
+	glBindVertexArray(vao[projection_mode-1]);
 
-	// COMPUTE TRANSFORMATIONS each sun, earth and moon
-	mat4 T_sun(1.0f);
-	// sun: self-rotation => Y-axis, origin
-	T_sun = rotate(T_sun, theta, vec3(0.0f, 0.1f, 0.0f));
-	T_sun = scale(T_sun, vec3(0.5f));
+	mat4 M(1.0f);
+	if (projection_mode == 1 || projection_mode == 2) {
+		// rotate cube
+		M = rotate(M, theta, vec3(1.0f, 0.0f, 0.0f));
+		M = rotate(M, theta, vec3(0.0f, 0.1f, 0.0f));
+	}
+	else if (projection_mode == 3 || projection_mode == 4) {
+		M = rotate(M, theta, vec3(0.0f, 1.0f, 1.0f));
+		M = rotate(M, theta, vec3(0.0f, 1.0f, 0.0f));
+	}
 
-	mat4 T_earth(1.0f);
-	// orbiting around the sun
-	T_earth = rotate(T_earth, theta, vec3(0.0f, 0.1f, 0.0f));
-	// translation to the earth position
-	T_earth = translate(T_earth, vec3(0.8f, 0.0f, 0.0f));
-	// earth self-rotation
-	T_earth = rotate(T_earth, theta, vec3(0.0f, 0.1f, 0.0f));
-	// scale: more smaller than sun
-	T_earth = scale(T_earth, vec3(0.12f));
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
+	double aspect = 1.0 * width / height;
 
-	mat4 T_moon(1.0f);
-	// orbiting around the sun
-	T_moon = rotate(T_moon, theta, vec3(0.0f, 0.1f, 0.0f));
-	// same position with earth
-	T_moon = translate(T_moon, vec3(0.8f, 0.0f, 0.0f));
-	// orbiting around the earth
-	T_moon = rotate(T_moon, theta2, vec3(0.0f, 0.1f, 0.0f));
-	// translation to the moon position
-	T_moon = translate(T_moon, vec3(0.2f, 0.0f, 0.0f));
-	// moon self-rotation
-	T_moon = rotate(T_moon, theta2, vec3(0.0f, 0.1f, 0.0f));
-	// scale: more smaller than earth
-	T_moon = scale(T_moon, vec3(0.08f));
+	mat4 V = lookAt(vec3(0, 0, 5), vec3(0, 0, 0), vec3(0, 1, 0));
+	mat4 P(1.0);
 
+	if (orth) {
+		P = parallel(1.2, aspect, 0.01, 10.0);
+	}
+	else {
+		P = perspective(M_PI / 180.0 * (30.0), aspect, 0.01, 10.0);
+	}
 
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1, 1);
@@ -170,12 +168,18 @@ void display()
 	// draw colored object(fill)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+
 	// 0: fragment shader => fcolor
-	glUniform1i(2, 0);
-	// draw each sun, earth, moon
-	draw_sphere(value_ptr(T_sun));
-	draw_sphere(value_ptr(T_earth));
-	draw_sphere(value_ptr(T_moon));
+	glUniform1i(4, 0);
+
+	if (projection_mode == 1)
+		draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+	else if (projection_mode == 2)
+		draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+	else if (projection_mode == 3)
+		draw_cone(vao[projection_mode-1], value_ptr(M), value_ptr(V), value_ptr(P));
+	else if (projection_mode == 4)
+		draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -187,10 +191,16 @@ void display()
 		glLineWidth(0.7);
 
 		// 1: fragment shader => black line
-		glUniform1i(2, 1);
-		draw_sphere(value_ptr(T_sun));
-		draw_sphere(value_ptr(T_earth));
-		draw_sphere(value_ptr(T_moon));
+		glUniform1i(4, 1);
+		if (projection_mode == 1)
+			draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 2)
+			draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 3)
+			draw_cone(vao[projection_mode-1], value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 4)
+			draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+
 	}
 
 	// if show_vertices is true
@@ -201,10 +211,15 @@ void display()
 		glPointSize(2);
 
 		// 1: fragment shader => black point
-		glUniform1i(2, 1);
-		draw_sphere(value_ptr(T_sun));
-		draw_sphere(value_ptr(T_earth));
-		draw_sphere(value_ptr(T_moon));
+		glUniform1i(4, 1);
+		if (projection_mode == 1)
+			draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 2)
+			draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 3)
+			draw_cone(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+		else if (projection_mode == 4)
+			draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
 	}
 
 	glFlush();
@@ -214,39 +229,47 @@ void display()
 }
 
 
-void init()
+void init(int program)
 {
 	srand(clock());
-	program = build_program();
+	
+	get_cube_3d(vtx_pos[0], 1, 1, 1);
+	get_sphere_3d(vtx_pos[1], 0.8f, 20, 25);
+	get_cone_3d(vtx_pos[2], idx_list[0], idx_list[1], 0.6, 1.2, 10);
+	get_cylinder_3d(vtx_pos[3], side_idx, top_idx, bottom_idx, 0.8f, 1.5, 8);
 
-	for (int i = 0; i < num_of_model; ++i) {
-		// make 3d sphere(radius: 0.8f, subdivition height: 20, subdivision axis: 10)
-		get_sphere_3d(vertices[i], 0.8f, 20, 10);
-		// make object colors using vertex positons
-		get_color_3d_by_pos(colors[i], vertices[i], 0);
-
-		// generate a new vertex array object
+	for (int i = 0; i < 4; i++) {
+		get_color_3d_by_pos(vtx_clrs[i], vtx_pos[i]);
 		glGenVertexArrays(1, &vao[i]);
-		// initialize vertex buffers to be referenced by vao.
 		glBindVertexArray(vao[i]);
-		// generate a new buffer objects.
-		glGenBuffers(2, vbo[i]);
 
-		bind_buffer(vbo[i][0], vertices[i], program, "vPosition", 3);
-		bind_buffer(vbo[i][1], colors[i], program, "vColor", 3);
+
+		const GLchar* attri_name[2] = { "vPosition", "vColor" };
+		GLvec* vtx_list[2] = { &(vtx_pos[i]), &(vtx_clrs[i]) };
+
+		glGenBuffers(2, vbo[i]);
+		for (int j = 0; j < 2; ++j) {
+			bind_buffer(vbo[i][j], *vtx_list[j], program, attri_name[j], 3);
+		}
+
+		glGenBuffers(2, element_buffs);
+		for (int j = 0; j < 2; ++j) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[j]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * idx_list[j].size(), idx_list[j].data(), GL_STATIC_DRAW);
+		}
+
+		glGenBuffers(2, cylinder_element_buffs);
+		for (int j = 0; j < 3; ++j) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinder_element_buffs[j]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * (cy_idx_list[j]->size()), cy_idx_list[j]->data(), GL_STATIC_DRAW);
+		}
+
 	}
 
 	// active depth test
 	glEnable(GL_DEPTH_TEST);
 	// pass if the depth value of the frame is less than the stored depth value.
 	glDepthFunc(GL_LESS);
-
-	// set to only on both the front and back sides.
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	glEnable(GL_CULL_FACE);
-	// remove the rear face.
-	glCullFace(GL_BACK);
 }
 
 int build_program()
@@ -289,7 +312,7 @@ mat4 parallel(double r, double aspect, double n, double f)
 	return ortho(l, r, b, t, n, f);
 }
 
-void get_color_3d_by_pos(GLvec& c, GLvec& p, GLfloat offset)
+void get_color_3d_by_pos(GLvec& c, GLvec& p)
 {
 	GLfloat max_val[3] = { -INFINITY, -INFINITY, -INFINITY };
 	GLfloat min_val[3] = { INFINITY, INFINITY, INFINITY };
@@ -318,7 +341,7 @@ void get_color_3d_by_pos(GLvec& c, GLvec& p, GLfloat offset)
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			int k = i * 3 + j;
-			c[k] = fminf((p[k] - min_val[j]) / width[j] + offset, 1.0f);
+			c[k] = fminf((p[k] - min_val[j]) / width[j], 1.0f);
 		}
 	}
 }
@@ -359,10 +382,19 @@ void get_cube_3d(GLvec& p, GLfloat lx, GLfloat ly, GLfloat lz)
 	}
 }
 
+void draw_cube(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+{
+	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
+	glUniformMatrix4fv(2, 1, GL_FALSE, V);
+	glUniformMatrix4fv(3, 1, GL_FALSE, P);
+
+	glDrawArrays(GL_TRIANGLES, 0, vtx_pos[0].size() / 3);
+}
+
 void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba)
 {
 	for (int i = 1; i <= subh; ++i) {
-		double theta0 = M_PI * (i-1) / subh;
+		double theta0 = M_PI * (i - 1) / subh;
 		double theta1 = M_PI * i / subh;
 
 		// rst = rsin(theta)
@@ -376,7 +408,7 @@ void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba)
 		double rst1 = r * sin(theta1);
 
 		for (int j = 1; j <= suba; ++j) {
-			double phi0 = 2 * M_PI * (j-1) / suba;
+			double phi0 = 2 * M_PI * (j - 1) / suba;
 			double phi1 = 2 * M_PI * j / suba;
 
 			// vx = sin(phi)rst
@@ -392,10 +424,10 @@ void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba)
 			float vx2, vy2, vz2, vx3, vy3, vz3;
 
 			// compute the coordinates(v0, v1, v2, v3)
-			FSET_VTX3(vx0, vy0, vz0, sp0*rst0, y0, cp0*rst0);
-			FSET_VTX3(vx1, vy1, vz1, sp0*rst1, y1, cp0*rst1);
-			FSET_VTX3(vx2, vy2, vz2, sp1*rst0, y0, cp1*rst0);
-			FSET_VTX3(vx3, vy3, vz3, sp1*rst1, y1, cp1*rst1);
+			FSET_VTX3(vx0, vy0, vz0, sp0 * rst0, y0, cp0 * rst0);
+			FSET_VTX3(vx1, vy1, vz1, sp0 * rst1, y1, cp0 * rst1);
+			FSET_VTX3(vx2, vy2, vz2, sp1 * rst0, y0, cp1 * rst0);
+			FSET_VTX3(vx3, vy3, vz3, sp1 * rst1, y1, cp1 * rst1);
 
 			if (i < subh) {
 				// first triangles (v0 - v1 - v3): Counter clockwise
@@ -414,12 +446,15 @@ void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba)
 	}
 }
 
-void draw_sphere(const GLfloat* trans_mat)
+void draw_sphere(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
 {
 	// transfer values to uniform variables.
 	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
+	glUniformMatrix4fv(2, 1, GL_FALSE, V);
+	glUniformMatrix4fv(3, 1, GL_FALSE, P);
+	
 	// draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, vertices[0].size() / 3);
+	glDrawArrays(GL_TRIANGLES, 0, vtx_pos[1].size() / 3);
 }
 
 void get_cone_3d(GLvec& p, GLsvec& side_idx, GLsvec& botton_idx, GLfloat radius, GLfloat height, GLint n)
@@ -441,6 +476,18 @@ void get_cone_3d(GLvec& p, GLsvec& side_idx, GLsvec& botton_idx, GLfloat radius,
 	botton_idx.push_back(1);
 }
 
+void draw_cone(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+{
+	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
+	glUniformMatrix4fv(2, 1, GL_FALSE, V);
+	glUniformMatrix4fv(3, 1, GL_FALSE, P);
+	glBindVertexArray(vao);
+	for (int i = 0; i < 2; ++i) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[i]);
+		glDrawElements(GL_TRIANGLE_FAN, idx_list[i].size(), GL_UNSIGNED_INT, NULL);
+	}
+}
+
 void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom_idx, GLfloat radius, GLfloat height, GLint n)
 {
 	GLfloat half_height = height / 2;
@@ -449,7 +496,7 @@ void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom
 
 	FPUSH_VTX3_AT(p, 0, 0, half_height, 0);
 	top_idx.push_back(0);
-	bottom_idx.push_back(2*n+3);
+	bottom_idx.push_back(2 * n + 3);
 	for (int i = 0; i <= n; ++i) {
 		theta = (GLfloat)(2.0 * M_PI * i / n);
 		x = radius * sin(theta);
@@ -462,6 +509,19 @@ void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom
 		bottom_idx.push_back(2 * n + 2 - 2 * i);
 	}
 	FPUSH_VTX3_AT(p, 2 * n + 3, 0, -half_height, 0);
+}
+
+void draw_cylinder(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+{
+	GLuint drawing_mode[3] = { GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLE_FAN };
+	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
+	glUniformMatrix4fv(2, 1, GL_FALSE, V);
+	glUniformMatrix4fv(3, 1, GL_FALSE, P);
+	glBindVertexArray(vao);
+	for (int i = 0; i < 3; ++i) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinder_element_buffs[i]);
+		glDrawElements(drawing_mode[i], cy_idx_list[i]->size(), GL_UNSIGNED_INT, NULL);
+	}
 }
 
 void get_tours_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh)
