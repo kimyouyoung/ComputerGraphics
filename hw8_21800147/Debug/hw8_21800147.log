@@ -1,6 +1,1 @@
-﻿  main.cpp
-C:\Users\user\Desktop\ComputerGraphics\hw8_21800147\main.cpp(79,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
-C:\Users\user\Desktop\ComputerGraphics\hw8_21800147\main.cpp(191,18): warning C4305: '인수': 'double'에서 'GLfloat'(으)로 잘립니다.
-C:\Users\user\Desktop\ComputerGraphics\hw8_21800147\main.cpp(238,64): warning C4305: '인수': 'double'에서 'GLfloat'(으)로 잘립니다.
-C:\Users\user\Desktop\ComputerGraphics\hw8_21800147\main.cpp(377,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-  hw8_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\hw8_21800147\Debug\hw8_21800147.exe
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppClean.targets(76,5): warning : 'c:\users\user\desktop\computergraphics\hw8_21800147\debug\vc142.idb' 파일은 다른 프로세스에서 사용 중이므로 프로세스에서 액세스할 수 없습니다.
