@@ -26,7 +26,7 @@ GLsvec idx_list[2];
 bool show_wireframes = false;
 bool show_vertices = false;
 int program;
-int projection_mode = 1;
+int projection_mode = 0;
 
 void keyboard(unsigned char key, int x, int y);
 void display();
@@ -123,8 +123,8 @@ void display()
 
 	// multiply 0.001f and time to set the angle.
 	GLfloat theta = 0.001f * clock();
-
-	GLuint location = glGetUniformLocation(program, "drawing_mode");
+	
+	GLuint location = glGetUniformLocation(program, "draw_mode");
 	// set the value of uniform.
 	glUniform1i(location, projection_mode);
 
@@ -147,6 +147,23 @@ void display()
 		T = rotate(T, theta, vec3(1.0f, 0.0f, 0.0f));
 	}
 
+
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
+	double aspect = 1.0 * width / height;
+
+	mat4 V = lookAt(vec3(0, 0, 5), vec3(0, 0, 0), vec3(0, 1, 0));
+	mat4 P(1.0);
+
+	if (projection_mode == 0) {
+		P = parallel(1.2, aspect, 0.01, 10.0);
+	}
+	else {
+		P = perspective(M_PI / 180.0 * (30.0), aspect, 0.01, 10.0);
+	}
+
+	glUniformMatrix4fv(2, 1, GL_FALSE, value_ptr(V));
+	glUniformMatrix4fv(3, 1, GL_FALSE, value_ptr(P));
 
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1, 1);
@@ -203,7 +220,7 @@ void init(GLuint program, GLfloat radius, GLfloat height, GLuint subdivs)
 	get_sphere_3d(vtx_pos[1], 0.8f, 20, 10);
 	get_cone_3d(vtx_pos[2], idx_list[0], idx_list[1], 0.8, 20, 10);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 2; i++) {
 		get_color_3d_by_pos(vtx_clrs[i], vtx_pos[i]);
 		glGenVertexArrays(1, &vao[i]);
 		glBindVertexArray(vao[i]);
@@ -214,9 +231,11 @@ void init(GLuint program, GLfloat radius, GLfloat height, GLuint subdivs)
 
 		glGenBuffers(2, element_buffs);
 		for (int j = 0; j < 2; ++j) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[j]);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * idx_list[j].size(),
-				idx_list[j].data(), GL_STATIC_DRAW);
+			bind_buffer(vbo[i][0], vtx_pos[i], program, attri_name[0], 3);
+			bind_buffer(vbo[i][1], vtx_clrs[i], program, attri_name[1], 3);
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[j]);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * idx_list[j].size(),
+			//	idx_list[j].data(), GL_STATIC_DRAW);
 		}
 	}
 }
