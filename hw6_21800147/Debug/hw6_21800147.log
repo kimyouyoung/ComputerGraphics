@@ -1,1 +1,6 @@
-﻿
+﻿  LoadShaders.cpp
+  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw6_21800147\main.cpp(54,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+C:\Users\user\Desktop\ComputerGraphics\hw6_21800147\main.cpp(162,18): warning C4305: '인수': 'double'에서 'GLfloat'(으)로 잘립니다.
+  코드를 생성하고 있습니다...
+  hw6_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\hw6_21800147\Debug\hw6_21800147.exe

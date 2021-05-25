@@ -1,0 +1,6 @@
+﻿  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\primi.h(170,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\primi.h(180,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\main.cpp(152,30): warning C4305: '*=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\main.cpp(351,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  HW9_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\Debug\HW9_21800147.exe

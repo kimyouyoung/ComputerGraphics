@@ -1,0 +1,16 @@
+﻿  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\primi.h(156,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\primi.h(166,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\main.cpp(175,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  util.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(55,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(131,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(132,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(157,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(158,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(179,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(180,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(185,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw8_answer\util.cpp(186,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  hw8_answer.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\hw8_answer\Debug\hw8_answer.exe

@@ -15,19 +15,18 @@ using namespace glm;
 typedef std::vector<GLfloat> GLvec;
 typedef std::vector<size_t> GLsvec;
 
-const GLuint num_of_model = 6;
+const GLuint num_of_model = 5;
 
 GLuint vao[num_of_model];
 GLuint vbo[num_of_model][2];
 GLvec vtx_pos[num_of_model], vtx_clrs[num_of_model];
 GLuint element_buffs[2];
 GLuint cylinder_element_buffs[3];
-GLuint torus_element_buffs[4];
+vector<GLuint> torus_element_buffs;
 GLsvec idx_list[2];
 GLsvec side_idx, top_idx, bottom_idx;
 GLsvec* cy_idx_list[] = { &side_idx, &top_idx, &bottom_idx };
-vector<GLvec> tt_side_idx;
-vector<GLsvec> t_side_idx[10];
+vector<GLsvec> t_side_idx;
 
 bool show_wireframes = false;
 bool show_vertices = false;
@@ -46,15 +45,17 @@ mat4 parallel(double r, double aspect, double n, double f);
 
 void get_color_3d_by_pos(GLvec& c, GLvec& p);
 void get_cube_3d(GLvec& p, GLfloat lx, GLfloat ly, GLfloat lz);
-void draw_cube(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
+void draw_cube();
 void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba);
-void draw_sphere(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* Pt);
+void draw_sphere();
 void get_cone_3d(GLvec& p, GLsvec& side_idx, GLsvec& botton_idx, GLfloat radius, GLfloat height, GLint n);
-void draw_cone(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
+void draw_cone();
 void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom_idx, GLfloat radius, GLfloat height, GLint n);
-void draw_cylinder(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
-//void get_tours_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh);
-//void draw_tours(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P);
+void draw_cylinder();
+void get_torus_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh);
+void draw_torus();
+mat4 transCar(GLfloat sx, GLfloat sy, GLfloat sz, GLfloat tx, GLfloat ty, GLfloat tz, mat4* T_pre = NULL, mat4* T_post = NULL, bool set_uniform = true);
+void draw_car();
 
 #define FPUSH_VTX3(p, vx, vy, vz)\
 do {\
@@ -132,25 +133,27 @@ void keyboard(unsigned char key, int x, int y)
 
 void display()
 {
+	// set the clear color to white
+	glClearColor(1, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// multiply 0.001f and time to set the angle.
-	GLfloat theta = 0.001f * clock();
+	// draw colored object(fill)
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	// bind vertex buffers to be referenced by vao.(each sun, earth, and moon vao)
-	glBindVertexArray(vao[projection_mode - 1]);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1, 1);
+
+	// 0: fragment shader => fcolor, location: 4 => fragment
+	glUniform1i(4, 0);
 
 	mat4 M(1.0f);
-	if (projection_mode == 1 || projection_mode == 2) {
-		// rotate cube ans sphere
-		M = rotate(M, theta, vec3(1.0f, 0.0f, 0.0f));
-		M = rotate(M, theta, vec3(0.0f, 0.1f, 0.0f));
-	}
-	else if (projection_mode == 3 || projection_mode == 4 || projection_mode == 5) {
-		// rotate cone, cylinder and tours
-		M = rotate(M, theta, vec3(0.0f, 1.0f, 0.0f));
-		M = rotate(M, theta, vec3(0.0f, 0.0f, 1.0f));
-	}
+	// multiply 0.001f and time to set the angle.
+	GLfloat theta = 0.001f * clock();
+	M = rotate(M, theta, vec3(-1.0f, 1.0f, 0.0f));
+	M = scale(M, vec3(1.0f));
+
+	// transfer values to uniform variables.
+	glUniformMatrix4fv(1, 1, GL_FALSE, value_ptr(M));
 
 	// find window's width and height
 	int width = glutGet(GLUT_WINDOW_WIDTH);
@@ -170,26 +173,23 @@ void display()
 		P = perspective(M_PI / 180.0 * (30.0), aspect, 0.01, 10.0);
 	}
 
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(1, 1);
+	// viewport values and projection values to uniform variables.
+	glUniformMatrix4fv(2, 1, GL_FALSE, value_ptr(V));
+	glUniformMatrix4fv(3, 1, GL_FALSE, value_ptr(P));
 
-	// draw colored object(fill)
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
-	// 0: fragment shader => fcolor, location: 4 => fragment
-	glUniform1i(4, 0);
 
 	if (projection_mode == 1)
-		draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+		draw_cube();
 	else if (projection_mode == 2)
-		draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+		draw_sphere();
 	else if (projection_mode == 3)
-		draw_cone(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+		draw_cone();
 	else if (projection_mode == 4)
-		draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
-	//else if (projection_mode == 5)
-		//draw_tours(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+		draw_cylinder();
+	else if (projection_mode == 5)
+		draw_torus();
+	else if (projection_mode == 6)
+		draw_car();
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -203,15 +203,17 @@ void display()
 		// 1: fragment shader => black line, location: 4 => fragment
 		glUniform1i(4, 1);
 		if (projection_mode == 1)
-			draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cube();
 		else if (projection_mode == 2)
-			draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_sphere();
 		else if (projection_mode == 3)
-			draw_cone(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cone();
 		else if (projection_mode == 4)
-			draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
-		//else if (projection_mode == 5)
-			//draw_tours(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cylinder();
+		else if (projection_mode == 5)
+			draw_torus();
+		else if (projection_mode == 6)
+			draw_car();
 
 	}
 
@@ -223,17 +225,18 @@ void display()
 		glPointSize(2);
 
 		// 1: fragment shader => black point, location: 4 => fragment
-		glUniform1i(4, 1);
 		if (projection_mode == 1)
-			draw_cube(value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cube();
 		else if (projection_mode == 2)
-			draw_sphere(value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_sphere();
 		else if (projection_mode == 3)
-			draw_cone(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cone();
 		else if (projection_mode == 4)
-			draw_cylinder(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
-		//else if (projection_mode == 5)
-			//draw_tours(vao[projection_mode - 1], value_ptr(M), value_ptr(V), value_ptr(P));
+			draw_cylinder();
+		else if (projection_mode == 5)
+			draw_torus();
+		else if (projection_mode == 6)
+			draw_car();
 	}
 
 	glFlush();
@@ -255,9 +258,12 @@ void init(int program)
 	get_cone_3d(vtx_pos[2], idx_list[0], idx_list[1], 0.6f, 1.2, 10);
 	// make 3d cylinder(radius: 0.6f, subdivition height: 1.6, subdivisions: 10)
 	get_cylinder_3d(vtx_pos[3], side_idx, top_idx, bottom_idx, 0.6f, 1.6, 10);
-	//get_tours_3d(vtx_pos[4], *t_side_idx,  5.0, 8.0, 10, 10);
+	// make 3d torus(tours radius: 0.3f, section radius: 0.4, subdivisions axis: 10, subdivisions height: 10)
+	get_torus_3d(vtx_pos[4], t_side_idx,  0.3, 0.4, 10, 10);
 
-	for (int i = 0; i < 4; i++) {
+	torus_element_buffs.resize(t_side_idx.size());
+
+	for (int i = 0; i < 5; i++) {
 		// make objects colors using vertex positons
 		get_color_3d_by_pos(vtx_clrs[i], vtx_pos[i]);
 		// generate a new vertex array object
@@ -279,24 +285,31 @@ void init(int program)
 		// generate a new buffer objects for 3D cone.
 		glGenBuffers(2, element_buffs);
 		for (int j = 0; j < 2; ++j) {
+			// bind buffer for element buffs -> cone
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[j]);
+			// copy idx_list data to the buffer object
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * idx_list[j].size(), idx_list[j].data(), GL_STATIC_DRAW);
 		}
 
 		// generate a new buffer objects for 3D cylinder.
 		glGenBuffers(2, cylinder_element_buffs);
 		for (int j = 0; j < 3; ++j) {
+			// bind buffer for cylinder_element_buffs -> cylinder
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinder_element_buffs[j]);
+			// copy cy_idx_list data to the buffer object
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * (cy_idx_list[j]->size()), cy_idx_list[j]->data(), GL_STATIC_DRAW);
 		}
 
-		/*
-		glGenBuffers(2, torus_element_buffs);
-		for (int j = 0; j < 4; ++j) {
+		// generate a new buffer objects for 3D torus.
+		// get size from torus element buffer size.
+		size_t n = torus_element_buffs.size();
+		glGenBuffers(n, torus_element_buffs.data());
+		for (int j = 0; j < n; ++j) {
+			// bind buffer for torus_element_buffs -> torus
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, torus_element_buffs[j]);
+			// copy t_side_idx data to the buffer object
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(size_t) * (t_side_idx[j].size()), t_side_idx[j].data(), GL_STATIC_DRAW);
 		}
-		*/
 
 	}
 
@@ -417,13 +430,9 @@ void get_cube_3d(GLvec& p, GLfloat lx, GLfloat ly, GLfloat lz)
 	}
 }
 
-void draw_cube(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+void draw_cube()
 {
-	// transfer values, projection values and viewport values to uniform variables.
-	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
-	glUniformMatrix4fv(2, 1, GL_FALSE, V);
-	glUniformMatrix4fv(3, 1, GL_FALSE, P);
-
+	glBindVertexArray(vao[0]);
 	glDrawArrays(GL_TRIANGLES, 0, vtx_pos[0].size() / 3);
 }
 
@@ -482,13 +491,9 @@ void get_sphere_3d(GLvec& p, GLfloat r, GLint subh, GLint suba)
 	}
 }
 
-void draw_sphere(const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+void draw_sphere()
 {
-	// transfer values, projection values and viewport values to uniform variables.
-	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
-	glUniformMatrix4fv(2, 1, GL_FALSE, V);
-	glUniformMatrix4fv(3, 1, GL_FALSE, P);
-
+	glBindVertexArray(vao[1]);
 	// draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, vtx_pos[1].size() / 3);
 }
@@ -502,24 +507,19 @@ void get_cone_3d(GLvec& p, GLsvec& side_idx, GLsvec& botton_idx, GLfloat radius,
 	side_idx.push_back(0);
 	for (int i = 0; i <= n; ++i) {
 		theta = (GLfloat)(2.0 * M_PI * i / n);
-		x = radius * sin(theta);
+		x = radius * sin(theta);	// x(i): rsin(theta), y(i): -height/2, z(i): rcos(theta)
 		z = radius * cos(theta);
-		FPUSH_VTX3(p, x, -half_height, z); // v(i+1) + p(i) -> side vertex
+		FPUSH_VTX3(p, x, -half_height, z); // v(i+1) + p(i) -> side
 		side_idx.push_back(i + 1);
 		botton_idx.push_back(n + 2 - i);
 	}
-	FPUSH_VTX3(p, 0, -half_height, 0); // v(i+2)  = (0, -h/2, 0) -> bottom vertex
+	FPUSH_VTX3(p, 0, -half_height, 0); // v(i+2)  = (0, -h/2, 0) -> bottom 
 	botton_idx.push_back(1);
 }
 
-void draw_cone(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+void draw_cone()
 {
-	// transfer values, projection values and viewport values to uniform variables.
-	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
-	glUniformMatrix4fv(2, 1, GL_FALSE, V);
-	glUniformMatrix4fv(3, 1, GL_FALSE, P);
-
-	glBindVertexArray(vao);
+	glBindVertexArray(vao[2]);
 	for (int i = 0; i < 2; ++i) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffs[i]);
 		glDrawElements(GL_TRIANGLE_FAN, idx_list[i].size(), GL_UNSIGNED_INT, NULL);
@@ -532,73 +532,139 @@ void get_cylinder_3d(GLvec& p, GLsvec& side_idx, GLsvec& top_idx, GLsvec& bottom
 	GLfloat theta, x, z;
 	p.resize(3 * (2 * n + 4));
 
-	FPUSH_VTX3_AT(p, 0, 0, half_height, 0); // top vertex
+	FPUSH_VTX3_AT(p, 0, 0, half_height, 0); // top 
 	top_idx.push_back(0);
 	bottom_idx.push_back(2 * n + 3);
 	for (int i = 0; i <= n; ++i) {
 		theta = (GLfloat)(2.0 * M_PI * i / n);
 		x = radius * sin(theta);
 		z = radius * cos(theta);
-		FPUSH_VTX3_AT(p, 2 * i + 1, x, half_height, z); // side - top vertex
-		FPUSH_VTX3_AT(p, 2 * i + 2, x, -half_height, z); // side - bottom vertex
-		side_idx.push_back(2 * i + 1);
-		side_idx.push_back(2 * i + 2);
+		FPUSH_VTX3_AT(p, 2 * i + 1, x, half_height, z); // side-top vertex --> side: triangle strip(rect <- two triangles)
+		FPUSH_VTX3_AT(p, 2 * i + 2, x, -half_height, z); // side-bottom vertex
+		side_idx.push_back(2 * i + 1);	// side-top
+		side_idx.push_back(2 * i + 2);	// side=bottom
 		top_idx.push_back(2 * i + 1);
 		bottom_idx.push_back(2 * n + 2 - 2 * i);
 	}
-	FPUSH_VTX3_AT(p, 2 * n + 3, 0, -half_height, 0); // bottom vertex
+	FPUSH_VTX3_AT(p, 2 * n + 3, 0, -half_height, 0); // bottom 
 }
 
-void draw_cylinder(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+void draw_cylinder()
 {
+	// strip for side part, triangle_strip for top and bottom
 	GLuint drawing_mode[3] = { GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLE_FAN };
-	// transfer values, projection values and viewport values to uniform variables.
-	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
-	glUniformMatrix4fv(2, 1, GL_FALSE, V);
-	glUniformMatrix4fv(3, 1, GL_FALSE, P);
 
-	glBindVertexArray(vao);
+	glBindVertexArray(vao[3]);
 	for (int i = 0; i < 3; ++i) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinder_element_buffs[i]);
 		glDrawElements(drawing_mode[i], cy_idx_list[i]->size(), GL_UNSIGNED_INT, NULL);
 	}
 }
-/*
-void get_tours_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh)
-{
-	GLfloat gamma;
-	GLfloat y, l;
-	GLfloat theta, x, z;
-	p.resize(4 * (2 * (na*nh) + 2));
 
-	for (int i = 0; i <= nh; ++i) {
-		gamma = (GLfloat)(2.0 * M_PI * i / nh);
+void get_torus_3d(GLvec& p, vector<GLsvec>& side_idx, GLfloat r0, GLfloat r1, GLint na, GLint nh)
+{
+
+	side_idx.resize(nh);
+	GLfloat gamma, y, l;
+	GLfloat theta;
+	GLfloat x, z, dx, dz;
+
+	for (int i = nh, j = 0; i >= 0; --i, ++j) {
+		GLfloat gamma = (GLfloat)(2.0 * M_PI * j / nh);
 		y = r1 * sin(gamma);
 		l = r1 * cos(gamma);
-
-		for (int j = 0; j <= na; ++j) {
-			theta = (GLfloat)(2.0 * M_PI * j / na);
+		int a = j * (na + 1);
+		int b = (j + 1) * (na + 1);
+		for (int k = 0; k <= na; ++k) {
+			theta = (GLfloat)(2.0 * M_PI * k / na);
 			x = (r0 + r1) * sin(theta);
 			z = (r0 + r1) * cos(theta);
-			FPUSH_VTX3_AT(p, i * (na + 1), x, y, z);
-			FPUSH_VTX3_AT(p, (i + 1) * (na + 1), x, l, z);
-			t_side_idx->at(i).push_back(i * (na + 1));
-			t_side_idx->at(i).push_back(i * (na + 1));
-			t_side_idx->at(i).push_back((i + 1) * (na + 1));
+			dx = l * sin(theta);
+			dz = l * cos(theta);
+
+			FPUSH_VTX3(p, x + dx, y, z + dz); // only side
+
+			if (j < nh) {
+				t_side_idx[j].push_back(a + k);		// index list for even th
+				t_side_idx[j].push_back(b + k);		// index list for odd th
+			}
 		}
 	}
 }
 
-void draw_tours(GLuint vao, const GLfloat* trans_mat, const GLfloat* V, const GLfloat* P)
+void draw_torus()
 {
-	glUniformMatrix4fv(1, 1, GL_FALSE, trans_mat);
-	glUniformMatrix4fv(2, 1, GL_FALSE, V);
-	glUniformMatrix4fv(3, 1, GL_FALSE, P);
-	glBindVertexArray(vao);
-	size_t n = 10;
+	glBindVertexArray(vao[4]);
+	size_t n = torus_element_buffs.size();
 	for (int i = 0; i < n; ++i) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinder_element_buffs[i]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, torus_element_buffs[i]);
 		glDrawElements(GL_TRIANGLE_STRIP, t_side_idx[i].size(), GL_UNSIGNED_INT, NULL);
 	}
 }
-*/
+
+mat4 transCar(GLfloat sx, GLfloat sy, GLfloat sz, GLfloat tx, GLfloat ty, GLfloat tz, mat4* T_pre, mat4* T_post, bool set_uniform)
+{
+	mat4 T;
+	T = translate(T, vec3(tx, ty, tz));
+	T = scale(T, vec3(sx, sy, sz));
+	if (T_pre) T = (*T_pre) * T;
+	if (T_post) T = T * (*T_post);
+	if (set_uniform) {
+		glUniformMatrix4fv(1, 1, GL_FALSE, value_ptr(T));
+	}
+
+	return T;
+}
+
+void draw_car()
+{
+	GLfloat theta = 0.001f * clock();
+	mat4 Rz = rotate(mat4(), -2 * theta, vec3(0.0f, 0.0f, 1.0f));
+	mat4 Ry = rotate(mat4(), -theta, vec3(0.0f, 1.0f, 0.0f));
+
+	// car body (cube)
+	transCar(1.2f, 0.4f, 0.6f, +0.0f, -0.2f, 0.0f, &Ry);
+	draw_cube();
+	// car upper body
+	transCar(0.6f, 0.6f, 0.6f, -0.3f, +0.3f, 0.0f, &Ry);
+	draw_cube();
+	// car front body
+	mat4 R_fb = rotate(mat4(), radians(90.0f), vec3(0, 0, 1)) * Ry;
+	transCar(0.5f, 0.5f, 0.5f, +0.25f, 0.0f, 0.0f, &Ry, &R_fb);
+	draw_cylinder();
+
+	// car roof
+	transCar(1.0f, 0.2f, 1.0f, -0.3f, +0.7f, 0.0f, &Ry);
+	draw_cone();
+
+	// car front-right light
+	transCar(0.1f, 0.1f, 0.1f, +0.6f, -0.2f, -0.2f, &Ry);
+	draw_sphere();
+	// car front-left light
+	transCar(0.1f, 0.1f, 0.1f, +0.6f, -0.2f, +0.2f, &Ry);
+	draw_sphere();
+
+	// front left tire
+	mat4 R_tire = Rz * rotate(mat4(), radians(90.0f), vec3(1, 0, 0));
+	transCar(0.3f, 0.3f, 0.3f, +0.3f, -0.4f, -0.4f, &Ry, &R_tire);
+	draw_torus();
+	// front right tire
+	transCar(0.3f, 0.3f, 0.3f, +0.3f, -0.4f, +0.4f, &Ry, &R_tire);
+	draw_torus();
+	// rear left tire
+	transCar(0.3f, 0.3f, 0.3f, -0.3f, -0.4f, -0.4f, &Ry, &R_tire);
+	draw_torus();
+	// rear right tire
+	transCar(0.3f, 0.3f, 0.3f, -0.3f, -0.4f, +0.4f, &Ry, &R_tire);
+	draw_torus();
+
+	// front shaft
+	mat4 R_shaft = Rz * rotate(mat4(), radians(90.0f), vec3(1, 0, 0));
+	transCar(0.12f, 0.12f, 0.9f, +0.3f, -0.4f, +0.0f, &Ry, &R_shaft);
+	draw_cylinder();
+	// rear shaft
+	transCar(0.12f, 0.12f, 0.9f, -0.3f, -0.4f, +0.0f, &Ry, &R_shaft);
+	draw_cylinder();
+
+}
+
