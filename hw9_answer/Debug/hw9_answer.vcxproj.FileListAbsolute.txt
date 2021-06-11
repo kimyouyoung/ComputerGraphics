@@ -1,0 +1,2 @@
+C:\Users\user\Desktop\ComputerGraphics\hw9_answer\Debug\hw9_answer.exe
+C:\Users\user\Desktop\ComputerGraphics\hw9_answer\Debug\hw9_answer.pdb
