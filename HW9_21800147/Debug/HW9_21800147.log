@@ -1,6 +1,19 @@
-﻿  main.cpp
+﻿  LoadShaders.cpp
+  main.cpp
 C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\primi.h(170,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
 C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\primi.h(180,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
 C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\main.cpp(152,30): warning C4305: '*=': 'double'에서 'float'(으)로 잘립니다.
 C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\main.cpp(351,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  util.cpp
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(55,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(131,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(132,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(157,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(158,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(179,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(180,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(185,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\util.cpp(186,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  LINK : C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\Debug\HW9_21800147.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
   HW9_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\HW9_21800147\Debug\HW9_21800147.exe

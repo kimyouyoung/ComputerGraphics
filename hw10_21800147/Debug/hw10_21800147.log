@@ -1,1 +1,27 @@
-﻿
+﻿  LoadShaders.cpp
+  main.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\main.cpp(189,33): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\main.cpp(413,30): warning C4305: '*=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\main.cpp(422,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  util.cpp
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(55,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(164,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(165,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(177,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(178,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(191,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(192,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(220,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(221,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(231,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(232,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(247,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(248,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(261,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(262,14): warning C4244: '=': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(282,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(283,13): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(288,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\util.cpp(289,15): warning C4244: '초기화 중': 'double'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  hw10_21800147.vcxproj -> C:\Users\user\Desktop\ComputerGraphics\hw10_21800147\Debug\hw10_21800147.exe

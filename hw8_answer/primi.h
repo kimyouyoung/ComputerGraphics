@@ -206,7 +206,7 @@ struct CarModel : public Model
 		bool set_uniform = true)
 	{
 		using namespace glm;
-		mat4 T;
+		mat4 T(1.0f);
 		T = translate(T, vec3(tx, ty, tz));
 		T = scale(T, vec3(sx, sy, sz));
 		if (T_pre) T = (*T_pre) * T;
@@ -222,8 +222,8 @@ struct CarModel : public Model
 	{
 		using namespace glm;
 		GLfloat theta = 0.001f * clock();
-		mat4 Rz = rotate(mat4(), -2 * theta, vec3(0.0f, 0.0f, 1.0f));
-		mat4 Ry = rotate(mat4(), -theta, vec3(0.0f, 1.0f, 0.0f));
+		mat4 Rz = rotate(mat4(1.0f), -2 * theta, vec3(0.0f, 0.0f, 1.0f));
+		mat4 Ry = rotate(mat4(1.0f), -theta, vec3(0.0f, 1.0f, 0.0f));
 
 		// car main body
 		transf(1.2f, 0.4f, 0.6f, +0.0f, -0.2f, 0.0f, &Ry);
@@ -234,7 +234,7 @@ struct CarModel : public Model
 		cube->draw();
 
 		// car front body
-		mat4 R_fb = rotate(mat4(), radians(90.0f), vec3(0, 0, 1)) * Ry;
+		mat4 R_fb = rotate(mat4(1.0f), radians(90.0f), vec3(0, 0, 1)) * Ry;
 		transf(0.5f, 0.5f, 0.5f, +0.25f, 0.0f, 0.0f, &Ry, &R_fb);
 		cylinder->draw();
 
@@ -254,7 +254,7 @@ struct CarModel : public Model
 
 
 		// front left tire
-		mat4 R_tire = Rz * rotate(mat4(), radians(90.0f), vec3(1, 0, 0));
+		mat4 R_tire = Rz * rotate(mat4(1.0f), radians(90.0f), vec3(1, 0, 0));
 		transf(0.3f, 0.3f, 0.3f, +0.3f, -0.4f, -0.4f, &Ry, &R_tire);
 		torus->draw();
 
@@ -272,7 +272,7 @@ struct CarModel : public Model
 
 
 		// front shaft
-		mat4 R_shaft = Rz * rotate(mat4(), radians(90.0f), vec3(1, 0, 0));
+		mat4 R_shaft = Rz * rotate(mat4(1.0f), radians(90.0f), vec3(1, 0, 0));
 		transf(0.12f, 0.12f, 0.9f, +0.3f, -0.4f, +0.0f, &Ry, &R_shaft);
 		cylinder->draw();
 
