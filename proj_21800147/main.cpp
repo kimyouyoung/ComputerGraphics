@@ -6,22 +6,34 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "primi.h"
 #include "camera.h"
+#include "coordinate.h"
 #include <time.h>
-#include <stack>
+#include <algorithm>
+
+/*
+* 4: N shape  x(0, 2) y(0, 2) z(0, 1)
+* xÃà -> 1: y(0, 1) z(0, 2), 2: y(-1, 1) z(0, 1), 3: y(0, 1) z(-1, 1)
+* yÃà -> 1: x(0, 1) z(-1, 1), 2: x(-1, 1) z(0, 1), 3: x(0, 1) z(0, 2)
+* zÃà -> 1: x(-1, 1) y(0, 2), 2: x(-1, 1) y(-1, 1), 3: x(0, 2) y(-1, 1)
+*/
 
 using namespace std;
 
 CubePrimitive cube(1.0f, 1.0f, 1.0f);
 Grid grid_down(5, 5, 5, 5, 0);
 Grid grid_up(5, 5, 5, 5, 10);
-LshapeModel LShape(&cube);
-IshapeModel IShape(&cube);
-BoxshapeModel BoxShape(&cube);
-NshapeModel NShape(&cube);
+
+Coordinate coor;
+LshapeModel LShape(&cube, &coor);
+IshapeModel IShape(&cube, &coor);
+
+NshapeModel NShape(&cube, &coor);
+
+BoxshapeModel BoxShape(&cube, &coor);
 vector<Model*> models;
 
 GLuint program;
-int idx_selected = 1;
+int idx_selected = 3;
 
 GLfloat box_cell = 0.3f / 1;
 GLfloat min_y = -1.0f;
@@ -30,6 +42,7 @@ int button_pressed[3] = { GLUT_UP, GLUT_UP, GLUT_UP };
 int mouse_pos[2] = { 0, 0 };
 
 Camera camera;
+
 struct ModelState {
 	glm::vec3 pos;
 	glm::vec3 scale;
@@ -105,6 +118,10 @@ void display()
 	glPolygonOffset(1, 1);
 	glUniform1i(2, 0);
 
+	printf("x: %d %d\n", coor.xMax, coor.xMin);
+	printf("y: %d %d\n", coor.yMax, coor.yMin);
+	printf("z: %d %d\n", coor.zMax, coor.zMin);
+
 	GLint location;
 
 	// modeling transformation matrix
@@ -165,20 +182,42 @@ void display()
 
 void keyboard(unsigned char key, int x, int y)
 {
+	int tmp1, tmp2;
 	switch (key)
 	{
+		// rotate a block about the x-axis by 90 degrees.
 	case 'a':
 		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * model_state.R;
+		tmp1 = coor.zMax;
+		tmp2 = coor.zMin;
+		coor.zMax = coor.yMax;
+		coor.zMin = coor.yMin;
+		coor.yMax = max(tmp1, tmp2);
+		coor.yMin = -min(tmp1, tmp2);
 		glutPostRedisplay();
 		break;
 
+		// rotate a block about the y-axis by 90 degrees.
 	case 's':
 		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * model_state.R;
+		tmp1 = coor.zMax;
+		tmp2 = coor.zMin;
+		coor.zMax = -coor.xMax;
+		coor.zMin = coor.xMin;
+		coor.xMax = tmp1;
+		coor.xMin = tmp2;
 		glutPostRedisplay();
 		break;
 
+		// rotate a block about the z-axis by 90 degrees.
 	case 'd':
 		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * model_state.R;
+		tmp1 = coor.yMax;
+		tmp2 = coor.yMin;
+		coor.yMax = coor.xMax;
+		coor.yMin = coor.xMin;
+		coor.xMax = -tmp1;
+		coor.xMin = tmp2;
 		glutPostRedisplay();
 		break;
 	}
@@ -333,8 +372,16 @@ void idle()
 	clock_t curr_time = clock();
 	if (1.0 * (curr_time - prev_time) / CLOCKS_PER_SEC > 1.0) {
 		// Updated the block to make it go down ... 
-		if(model_state.pos[1] - box_cell > min_y)
+		/*if (model_state.pos[1] == -1.0f + (box_cell * 10) + (box_cell / 2)) {
+			coor.yMax += 10;
+			coor.yMin += 10;
+		}*/
+		/*if (model_state.pos[1] - box_cell > min_y) {
 			model_state.pos[1] -= box_cell;
+			coor.yMax--;
+			coor.yMin--;
+		}*/
+			
 		glutPostRedisplay();
 		prev_time = curr_time;
 	}

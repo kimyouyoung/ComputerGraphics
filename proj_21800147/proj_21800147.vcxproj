@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="coordinate.h" />
     <ClInclude Include="LoadShaders.h" />
     <ClInclude Include="primi.h" />
     <ClInclude Include="util.h" />

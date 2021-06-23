@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "coordinate.h"
+
 class Model {
 public:
 
@@ -69,12 +71,21 @@ struct LshapeModel : public Model
 {
 
 	CubePrimitive* cube;
+	Coordinate* coor;
 
 	LshapeModel(
-		CubePrimitive* cube
+		CubePrimitive* cube,
+		Coordinate* coor
 	)
 	{
 		this->cube = cube;
+		this->coor = coor;
+		coor->xMin = 0;
+		coor->xMax = 2;
+		coor->yMin = 0;
+		coor->yMax = 3;
+		coor->zMin = 0;
+		coor->zMax = 1;
 	}
 
 	glm::mat4 transf(
@@ -114,12 +125,21 @@ struct LshapeModel : public Model
 struct IshapeModel : public Model
 {
 	CubePrimitive* cube;
+	Coordinate* coor;
 
 	IshapeModel(
-		CubePrimitive* cube
+		CubePrimitive* cube,
+		Coordinate* coor
 	)
 	{
 		this->cube = cube;
+		this->coor = coor;
+		coor->xMin = 0;
+		coor->xMax = 1;
+		coor->yMin = 0;
+		coor->yMax = 4;
+		coor->zMin = 0;
+		coor->zMax = 1;
 	}
 
 	glm::mat4 transf(
@@ -159,12 +179,21 @@ struct IshapeModel : public Model
 struct BoxshapeModel : public Model
 {
 	CubePrimitive* cube;
+	Coordinate* coor;
 
 	BoxshapeModel(
-		CubePrimitive* cube
+		CubePrimitive* cube,
+		Coordinate* coor
 	)
 	{
 		this->cube = cube;
+		this->coor = coor;
+		coor->xMin = 0;
+		coor->xMax = 2;
+		coor->yMin = 0;
+		coor->yMax = 2;
+		coor->zMin = 0;
+		coor->zMax = 1;
 	}
 
 	glm::mat4 transf(
@@ -204,12 +233,21 @@ struct BoxshapeModel : public Model
 struct NshapeModel : public Model
 {
 	CubePrimitive* cube;
+	Coordinate* coor;
 
 	NshapeModel(
-		CubePrimitive* cube
+		CubePrimitive* cube,
+		Coordinate* coor
 	)
 	{
-		this->cube = cube;
+		this->cube = cube; 
+		this->coor = coor;
+		coor->xMin = 0;
+		coor->xMax = 2;
+		coor->yMin = -1;
+		coor->yMax = 2;
+		coor->zMin = 0;
+		coor->zMax = 1;
 	}
 
 	glm::mat4 transf(
@@ -237,10 +275,10 @@ struct NshapeModel : public Model
 		transf(0.0f, 1.0f, 0.0f);
 		cube->draw();
 
-		transf(-1.0f, 1.0f, 0.0f);
+		transf(1.0f, 0.0f, 0.0f);
 		cube->draw();
 
-		transf(-1.0f, 1.0f * 2, 0.0f);
+		transf(1.0f, -1.0f, 0.0f);
 		cube->draw();
 
 	}
