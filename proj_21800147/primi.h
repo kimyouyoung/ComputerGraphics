@@ -81,11 +81,11 @@ struct LshapeModel : public Model
 		this->cube = cube;
 		this->coor = coor;
 		coor->xMin = 0;
-		coor->xMax = 2;
+		coor->xMax = 1;
 		coor->yMin = 0;
-		coor->yMax = 3;
+		coor->yMax = 2;
 		coor->zMin = 0;
-		coor->zMax = 1;
+		coor->zMax = 0;
 	}
 
 	glm::mat4 transf(
@@ -107,6 +107,7 @@ struct LshapeModel : public Model
 	{
 		using namespace glm;
 
+		// standard block
 		transf(0.0f, 0.0f, 0.0f);
 		cube->draw();
 
@@ -135,11 +136,11 @@ struct IshapeModel : public Model
 		this->cube = cube;
 		this->coor = coor;
 		coor->xMin = 0;
-		coor->xMax = 1;
+		coor->xMax = 0;
 		coor->yMin = 0;
-		coor->yMax = 4;
+		coor->yMax = 3;
 		coor->zMin = 0;
-		coor->zMax = 1;
+		coor->zMax = 0;
 	}
 
 	glm::mat4 transf(
@@ -161,10 +162,11 @@ struct IshapeModel : public Model
 	{
 		using namespace glm;
 
+		// standard block
 		transf(0.0f, 0.0f, 0.0f);
 		cube->draw();
 
-		transf(0.0f, 1.0f , 0.0f);
+		transf(0.0f, 1.0f, 0.0f);
 		cube->draw();
 
 		transf(0.0f, 1.0f * 2, 0.0f);
@@ -189,11 +191,11 @@ struct BoxshapeModel : public Model
 		this->cube = cube;
 		this->coor = coor;
 		coor->xMin = 0;
-		coor->xMax = 2;
+		coor->xMax = 1;
 		coor->yMin = 0;
-		coor->yMax = 2;
+		coor->yMax = 1;
 		coor->zMin = 0;
-		coor->zMax = 1;
+		coor->zMax = 0;
 	}
 
 	glm::mat4 transf(
@@ -215,6 +217,7 @@ struct BoxshapeModel : public Model
 	{
 		using namespace glm;
 
+		// standard block
 		transf(0.0f, 0.0f, 0.0f);
 		cube->draw();
 
@@ -240,14 +243,14 @@ struct NshapeModel : public Model
 		Coordinate* coor
 	)
 	{
-		this->cube = cube; 
+		this->cube = cube;
 		this->coor = coor;
-		coor->xMin = 0;
-		coor->xMax = 2;
-		coor->yMin = -1;
+		coor->xMin = -1;
+		coor->xMax = 0;
+		coor->yMin = 0;
 		coor->yMax = 2;
 		coor->zMin = 0;
-		coor->zMax = 1;
+		coor->zMax = 0;
 	}
 
 	glm::mat4 transf(
@@ -269,16 +272,17 @@ struct NshapeModel : public Model
 	{
 		using namespace glm;
 
+		// standard block
 		transf(0.0f, 0.0f, 0.0f);
 		cube->draw();
 
 		transf(0.0f, 1.0f, 0.0f);
 		cube->draw();
 
-		transf(1.0f, 0.0f, 0.0f);
+		transf(-1.0f, 1.0f, 0.0f);
 		cube->draw();
 
-		transf(1.0f, -1.0f, 0.0f);
+		transf(-1.0f, 1.0f * 2, 0.0f);
 		cube->draw();
 
 	}

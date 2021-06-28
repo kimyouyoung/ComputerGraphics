@@ -1,26 +1,22 @@
 #pragma once
 
-
-// origin: (x, z) -> (2,3)
 struct Coordinate
 {
-	int xMin;
 	int xMax;
-
-	int yMin;
+	int xMin;
 	int yMax;
-
-	int zMin;
+	int yMin;
 	int zMax;
+	int zMin;
 
 	Coordinate() {
-		xMin = 0;
 		xMax = 0;
-		
-		yMin = 0;
-		yMax = 0;
+		xMin = 0;
 
-		zMin = 0;
+		yMax = 0;
+		yMin = 0;
+
 		zMax = 0;
+		zMin = 0;
 	}
 };

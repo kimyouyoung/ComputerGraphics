@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -9,31 +10,33 @@
 #include "coordinate.h"
 #include <time.h>
 #include <algorithm>
+#include <cmath>
 
-/*
-* 4: N shape  x(0, 2) y(0, 2) z(0, 1)
-* xÃà -> 1: y(0, 1) z(0, 2), 2: y(-1, 1) z(0, 1), 3: y(0, 1) z(-1, 1)
-* yÃà -> 1: x(0, 1) z(-1, 1), 2: x(-1, 1) z(0, 1), 3: x(0, 1) z(0, 2)
-* zÃà -> 1: x(-1, 1) y(0, 2), 2: x(-1, 1) y(-1, 1), 3: x(0, 2) y(-1, 1)
-*/
 
 using namespace std;
 
+Coordinate coor[4];
 CubePrimitive cube(1.0f, 1.0f, 1.0f);
 Grid grid_down(5, 5, 5, 5, 0);
 Grid grid_up(5, 5, 5, 5, 10);
 
-Coordinate coor;
-LshapeModel LShape(&cube, &coor);
-IshapeModel IShape(&cube, &coor);
-
-NshapeModel NShape(&cube, &coor);
-
-BoxshapeModel BoxShape(&cube, &coor);
+LshapeModel LShape(&cube, &(coor[0]));
+IshapeModel IShape(&cube, &(coor[1]));
+BoxshapeModel BoxShape(&cube, &(coor[2]));
+NshapeModel NShape(&cube, &(coor[3]));
 vector<Model*> models;
 
 GLuint program;
-int idx_selected = 3;
+int idx_selected = 2;
+bool show_wireframe = true;
+
+bool stack[5][10][5] = { false };
+int xAxis[4] = { 0 };
+int yAxis[4] = { 0 };
+int zAxis[4] = { 0 };
+
+bool over = false;
+int score = 0;
 
 GLfloat box_cell = 0.3f / 1;
 GLfloat min_y = -1.0f;
@@ -106,6 +109,17 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 }
+glm::mat4 transf(
+	GLfloat tx, GLfloat ty, GLfloat tz,
+	bool set_uniform = true)
+{
+	using namespace glm;
+	mat4 T(1.0f);
+	T = translate(T, vec3(tx, ty, tz));
+	T = scale(T, vec3(0.3f));
+
+	return T;
+}
 
 void display()
 {
@@ -118,24 +132,11 @@ void display()
 	glPolygonOffset(1, 1);
 	glUniform1i(2, 0);
 
-	printf("x: %d %d\n", coor.xMax, coor.xMin);
-	printf("y: %d %d\n", coor.yMax, coor.yMin);
-	printf("z: %d %d\n", coor.zMax, coor.zMin);
-
 	GLint location;
 
 	// modeling transformation matrix
 	mat4 T(1.0f);
 	glUniformMatrix4fv(1, 1, GL_FALSE, value_ptr(T));
-
-	// modeling transformation matrix
-	mat4 M(1.0f);
-	M = translate(M, model_state.pos);
-	M = rotate(M, 0.0f, vec3(0.0f, 1.0f, 0.0f));
-	M = scale(M, model_state.scale);
-	M = M * model_state.R;
-	location = glGetUniformLocation(program, "M");
-	glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(M));
 
 	// viewing transformation matrix
 	mat4 V = camera.get_viewing();
@@ -151,16 +152,72 @@ void display()
 	location = glGetUniformLocation(program, "P");
 	glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(P));
 
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int l = 0; l < 5; l++) {
+				if (stack[i][j][l]) {
+					location = glGetUniformLocation(program, "T");
+					glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(mat4(1.0f)));
+					mat4 ST = transf(-0.6f + (i * box_cell), -0.85f + (j * box_cell), 0.6f - (l * box_cell));
+					location = glGetUniformLocation(program, "M");
+					glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(ST));
+					models[0]->draw();
+				}
+			}
+		}
+	}
+
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	if (show_wireframe)
+	{
+		set_color(0, 0, 0);
+		glLineWidth(1.0f);
+		glUniform1i(2, 1);
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 10; j++) {
+				for (int l = 0; l < 5; l++) {
+					if (stack[i][j][l]) {
+						location = glGetUniformLocation(program, "T");
+						glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(mat4(1.0f)));
+						mat4 ST = transf(-0.6f + (i * box_cell), -0.85f + (j * box_cell), 0.6f - (l * box_cell));
+						location = glGetUniformLocation(program, "M");
+						glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(ST));
+						models[0]->draw_wire();
+					}
+				}
+			}
+		}
+	}
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1, 1);
+	glUniform1i(2, 0);
+
+	// modeling transformation matrix
+	mat4 M(1.0f);
+	M = translate(M, model_state.pos);
+	M = rotate(M, 0.0f, vec3(0.0f, 1.0f, 0.0f));
+	M = scale(M, model_state.scale);
+	M = M * model_state.R;
+
+	location = glGetUniformLocation(program, "M");
+	glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(M));
+
+
 	// Draw the selected model
 	models[idx_selected]->draw();
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 
-	set_color(0, 0, 0);
-	glLineWidth(1.0f);
-	glUniform1i(2, 1);
-	models[idx_selected]->draw_wire();
-	
+	if (show_wireframe) 
+	{
+		set_color(0, 0, 0);
+		glLineWidth(1.0f);
+		glUniform1i(2, 1);
+		models[idx_selected]->draw_wire();
+	}
 
 	// draw the grid
 	set_color(1, 1, 1);
@@ -175,49 +232,76 @@ void display()
 	glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(GM));
 	grid_down.draw();
 	grid_up.draw();
-	
+
 
 	glFlush();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
-	int tmp1, tmp2;
+	bool pass = true;
 	switch (key)
 	{
 		// rotate a block about the x-axis by 90 degrees.
 	case 'a':
-		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * model_state.R;
-		tmp1 = coor.zMax;
-		tmp2 = coor.zMin;
-		coor.zMax = coor.yMax;
-		coor.zMin = coor.yMin;
-		coor.yMax = max(tmp1, tmp2);
-		coor.yMin = -min(tmp1, tmp2);
+		glm::mat4 A = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		for (int i = 0; i < 4; i++) {
+			glm::vec4 point((float)xAxis[i], (float)yAxis[i], (float)zAxis[i], 1);
+			glm::vec4 result = A * point;
+			yAxis[i] = (int)result[1] + yAxis[i];
+			zAxis[i] = (int)(result[2]) % 2 + 1 ;
+			if (zAxis[i] < -2 && zAxis[i] > 2)
+				pass = false;
+			if (yAxis[i] < 0)
+				pass = false;
+			/*for (int j = 0; j < 5; j++) {
+				for (int l = 0; l < 5; l++) {
+					if (yAxis[i] < 10 && stack[j][yAxis[i]][l])
+						pass = false;
+				}
+			}*/
+		}
+		if(pass)
+			model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * model_state.R;
+
 		glutPostRedisplay();
 		break;
 
 		// rotate a block about the y-axis by 90 degrees.
 	case 's':
-		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * model_state.R;
-		tmp1 = coor.zMax;
-		tmp2 = coor.zMin;
-		coor.zMax = -coor.xMax;
-		coor.zMin = coor.xMin;
-		coor.xMax = tmp1;
-		coor.xMin = tmp2;
+		glm::mat4 S = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		for (int i = 0; i < 4; i++) {
+			glm::vec4 point((float)xAxis[i], (float)yAxis[i], (float)zAxis[i], 1);
+			glm::vec4 result = S * point;
+			xAxis[i] = (int)result[0];
+			zAxis[i] = (int)result[2];
+			if (zAxis[i] < -2 && zAxis[i] > 2)
+				pass = false;
+			if (xAxis[i] < -2 && xAxis[i] > 2) 
+				pass = false;
+			for (int j = 0; j < 10; j++) {
+				if (xAxis[i] + 2 >= 0 && xAxis[i] + 2 < 5 && abs(zAxis[i] - 2) >= 0 && abs(zAxis[i] - 2) < 5) {
+					if (stack[xAxis[i] + 2][j][abs(zAxis[i] - 2)])
+						pass = false;
+				}
+			}
+		}
+		if (pass)
+			model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * model_state.R;
 		glutPostRedisplay();
 		break;
 
 		// rotate a block about the z-axis by 90 degrees.
 	case 'd':
 		model_state.R = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * model_state.R;
-		tmp1 = coor.yMax;
-		tmp2 = coor.yMin;
-		coor.yMax = coor.xMax;
-		coor.yMin = coor.xMin;
-		coor.xMax = -tmp1;
-		coor.xMin = tmp2;
+		
+		glutPostRedisplay();
+		break;
+
+	case 'w':
+		show_wireframe = !show_wireframe;
 		glutPostRedisplay();
 		break;
 	}
@@ -233,14 +317,49 @@ void specialkey(int key, int x, int y)
 	x_axis = normalize(x_axis);
 	float angle = (float)(180.0f * acosf(dot(x_axis, vec3(1, 0, 0))) / M_PI);
 
+	int signX = model_state.pos[0] / abs(model_state.pos[0]);
+	int signZ = model_state.pos[2] / abs(model_state.pos[2]);
+
 	if (angle < 45)
 	{
 		switch (key)
 		{
-		case GLUT_KEY_LEFT: model_state.pos[0] -= box_cell; break;
-		case GLUT_KEY_RIGHT: model_state.pos[0] += box_cell; break;
-		case GLUT_KEY_UP: model_state.pos[2] -= box_cell; break;
-		case GLUT_KEY_DOWN: model_state.pos[2] += box_cell; break;
+		case GLUT_KEY_LEFT:
+			if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMin) > -0.6f) {
+				model_state.pos[0] -= box_cell;
+				coor[idx_selected - 1].xMin--;
+				coor[idx_selected - 1].xMax--;
+				for (int i = 0; i < 4; i++)
+					xAxis[i] -=  1;
+			} 
+			break;
+		case GLUT_KEY_RIGHT:
+			if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMax) < 0.6f) {
+				model_state.pos[0] += box_cell;
+				coor[idx_selected - 1].xMin++;
+				coor[idx_selected - 1].xMax++;
+				for (int i = 0; i < 4; i++)
+					xAxis[i] += 1;
+			}
+			break;
+		case GLUT_KEY_UP:
+			if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMin) > -0.6f) {
+				model_state.pos[2] -= box_cell;
+				coor[idx_selected - 1].zMin--;
+				coor[idx_selected - 1].zMax--;
+				for (int i = 0; i < 4; i++)
+					zAxis[i] -= 1;
+			}
+			break;
+		case GLUT_KEY_DOWN: 
+			if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMax) < 0.6f) {
+				model_state.pos[2] += box_cell;
+				coor[idx_selected - 1].zMin++;
+				coor[idx_selected - 1].zMax++;
+				for (int i = 0; i < 4; i++)
+					zAxis[i] += 1;
+			}
+			break;
 		}
 	}
 	else if (angle < 135)
@@ -249,20 +368,84 @@ void specialkey(int key, int x, int y)
 		{
 			switch (key)
 			{
-			case GLUT_KEY_LEFT: model_state.pos[2] -= box_cell; break;
-			case GLUT_KEY_RIGHT: model_state.pos[2] += box_cell; break;
-			case GLUT_KEY_UP: model_state.pos[0] += box_cell; break;
-			case GLUT_KEY_DOWN: model_state.pos[0] -= box_cell; break;
+			case GLUT_KEY_LEFT: 
+				if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMin) > -0.6f) {
+					model_state.pos[2] -= box_cell;
+					coor[idx_selected - 1].zMin--;
+					coor[idx_selected - 1].zMax--;
+					for (int i = 0; i < 4; i++)
+						zAxis[i] -= 1;
+				}
+				break;
+			case GLUT_KEY_RIGHT: 
+				if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMax) < 0.6f) {
+					model_state.pos[2] += box_cell;
+					coor[idx_selected - 1].zMin++;
+					coor[idx_selected - 1].zMax++;
+					for (int i = 0; i < 4; i++)
+						zAxis[i] += 1;
+				}
+				break;
+			case GLUT_KEY_UP: 
+				if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMax) < 0.6f) {
+					model_state.pos[0] += box_cell;
+					coor[idx_selected - 1].xMin++;
+					coor[idx_selected - 1].xMax++;
+					for (int i = 0; i < 4; i++)
+						xAxis[i] += 1;
+				}
+				break;
+			case GLUT_KEY_DOWN: 
+				if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMin) > -0.6f) {
+					model_state.pos[0] -= box_cell;
+					coor[idx_selected - 1].xMin--;
+					coor[idx_selected - 1].xMax--;
+					for (int i = 0; i < 4; i++)
+						xAxis[i] -= 1;
+				}
+				break;
 			}
 		}
 		else
 		{
 			switch (key)
 			{
-			case GLUT_KEY_LEFT: model_state.pos[2] += box_cell; break;
-			case GLUT_KEY_RIGHT: model_state.pos[2] -= box_cell; break;
-			case GLUT_KEY_UP: model_state.pos[0] -= box_cell; break;
-			case GLUT_KEY_DOWN: model_state.pos[0] += box_cell; break;
+			case GLUT_KEY_LEFT: 
+				if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMax) < 0.6f) {
+					model_state.pos[2] += box_cell;
+					coor[idx_selected - 1].zMin++;
+					coor[idx_selected - 1].zMax++;
+					for (int i = 0; i < 4; i++)
+						zAxis[i] += 1;
+				}
+				break;
+			case GLUT_KEY_RIGHT: 
+				if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMin) > -0.6f) {
+					model_state.pos[2] -= box_cell;
+					coor[idx_selected - 1].zMin--;
+					coor[idx_selected - 1].zMax--;
+					for (int i = 0; i < 4; i++)
+						zAxis[i] -= 1;
+				}
+				break;
+			case GLUT_KEY_UP: 
+				if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMax) < 0.6f) {
+					model_state.pos[0] += box_cell;
+					coor[idx_selected - 1].xMin++;
+					coor[idx_selected - 1].xMax++;
+					for (int i = 0; i < 4; i++)
+						xAxis[i] += 1;
+				}
+				break;
+			case GLUT_KEY_DOWN:
+				if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMin) > -0.6f) {
+					model_state.pos[0] -= box_cell;
+					coor[idx_selected - 1].xMin--;
+					coor[idx_selected - 1].xMax--;
+					for (int i = 0; i < 4; i++)
+						xAxis[i] -= 1;
+				}
+				break;
 			}
 		}
 	}
@@ -270,15 +453,46 @@ void specialkey(int key, int x, int y)
 	{
 		switch (key)
 		{
-		case GLUT_KEY_LEFT: model_state.pos[0] += box_cell; break;
-		case GLUT_KEY_RIGHT: model_state.pos[0] -= box_cell; break;
-		case GLUT_KEY_UP: model_state.pos[2] += box_cell; break;
-		case GLUT_KEY_DOWN: model_state.pos[2] -= box_cell; break;
+		case GLUT_KEY_LEFT: 
+			if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMax) < 0.6f) {
+				model_state.pos[0] += box_cell;
+				coor[idx_selected - 1].xMin++;
+				coor[idx_selected - 1].xMax++;
+				for (int i = 0; i < 4; i++)
+					xAxis[i] += 1;
+			}
+			break;
+		case GLUT_KEY_RIGHT:
+			if (signX * abs(model_state.pos[0] * coor[idx_selected - 1].xMin) > -0.6f) {
+				model_state.pos[0] -= box_cell;
+				coor[idx_selected - 1].xMin--;
+				coor[idx_selected - 1].xMax--;
+				for (int i = 0; i < 4; i++)
+					xAxis[i] -= 1;
+			}
+			break;
+		case GLUT_KEY_UP: 
+			if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMax) < 0.6f) {
+				model_state.pos[2] += box_cell;
+				coor[idx_selected - 1].zMin++;
+				coor[idx_selected - 1].zMax++;
+				for (int i = 0; i < 4; i++)
+					zAxis[i] += 1;
+			}
+			break;
+		case GLUT_KEY_DOWN:
+			if (signZ * abs(model_state.pos[2] * coor[idx_selected - 1].zMin) > -0.6f) {
+				model_state.pos[2] -= box_cell;
+				coor[idx_selected - 1].zMin--;
+				coor[idx_selected - 1].zMax--;
+				for (int i = 0; i < 4; i++)
+					zAxis[i] -= 1;
+			}
+			break;
 		}
 	}
 
 	glutPostRedisplay();
-	// may do any other operations here if needed
 }
 
 void mouse(int button, int state, int x, int y)
@@ -366,24 +580,197 @@ void mouse_wheel(int wheel, int dir, int x, int y)
 	glutPostRedisplay();
 }
 
+void coordinateInit(int idx)
+{
+	if (idx == 1) {
+		coor[idx - 1].xMin = 0;
+		coor[idx - 1].xMax = 1;
+		coor[idx - 1].yMin = 0;
+		coor[idx - 1].yMax = 2;
+		coor[idx - 1].zMin = 0;
+		coor[idx - 1].zMax = 0;
+	}
+	else if (idx == 2) {
+		coor[idx - 1].xMin = 0;
+		coor[idx - 1].xMax = 0;
+		coor[idx - 1].yMin = 0;
+		coor[idx - 1].yMax = 3;
+		coor[idx - 1].zMin = 0;
+		coor[idx - 1].zMax = 0;
+	}
+	else if (idx == 3) {
+		coor[idx - 1].xMin = 0;
+		coor[idx - 1].xMax = 1;
+		coor[idx - 1].yMin = 0;
+		coor[idx - 1].yMax = 1;
+		coor[idx - 1].zMin = 0;
+		coor[idx - 1].zMax = 0;
+	}
+	else if (idx == 4)
+	{
+		coor[idx - 1].xMin = -1;
+		coor[idx - 1].xMax = 0;
+		coor[idx - 1].yMin = 0;
+		coor[idx - 1].yMax = 2;
+		coor[idx - 1].zMin = 0;
+		coor[idx - 1].zMax = 0;
+	}
+}
+
+void modelStateInit()
+{
+	coordinateInit(idx_selected);
+	idx_selected = rand() % 4 + 1;
+
+	model_state.pos[0] = 0.0f;
+	model_state.pos[1] = -1.0f + (box_cell * 10) + (box_cell / 2);
+	model_state.pos[2] = 0.0f;
+
+	model_state.R = glm::mat4(1.0f);
+
+	if (idx_selected == 1) {
+		xAxis[0] = 0; yAxis[0] = 10; zAxis[0] = 0;
+		xAxis[1] = 1; yAxis[1] = 10; zAxis[1] = 0;
+		xAxis[2] = 0; yAxis[2] = 11; zAxis[2] = 0;
+		xAxis[3] = 0; yAxis[3] = 12; zAxis[3] = 0;
+	}
+	else if (idx_selected == 2) {
+		xAxis[0] = 0; yAxis[0] = 10; zAxis[0] = 0;
+		xAxis[1] = 0; yAxis[1] = 11; zAxis[1] = 0;
+		xAxis[2] = 0; yAxis[2] = 12; zAxis[2] = 0;
+		xAxis[3] = 0; yAxis[3] = 13; zAxis[3] = 0;
+	}
+	else if (idx_selected == 3) {
+		xAxis[0] = 0; yAxis[0] = 10; zAxis[0] = 0;
+		xAxis[1] = 1; yAxis[1] = 10; zAxis[1] = 0;
+		xAxis[2] = 0; yAxis[2] = 11; zAxis[2] = 0;
+		xAxis[3] = 1; yAxis[3] = 11; zAxis[3] = 0;
+	}
+	else if (idx_selected == 4) {
+		xAxis[0] = 0; yAxis[0] = 10; zAxis[0] = 0;
+		xAxis[1] = 0; yAxis[1] = 11; zAxis[1] = 0;
+		xAxis[2] = -1; yAxis[2] = 11; zAxis[2] = 0;
+		xAxis[3] = -1; yAxis[3] = 12; zAxis[3] = 0;
+	}
+}
+
+void newGame()
+{
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int l = 0; l < 5; l++) {
+				stack[i][j][l] = false;
+			}
+		}
+	}
+	modelStateInit();
+	score = 0;
+}
+
+void clearPlane()
+{
+	for (int y = 0; y < 10; y++) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				if (y == 9) {
+					stack[x][y][z] = false;
+				}
+				else {
+					stack[x][y][z] = stack[x][y + 1][z];
+				}
+			}
+		}
+	}
+}
+
 void idle()
 {
 	static clock_t prev_time = clock();
 	clock_t curr_time = clock();
+	bool check = false;
+	char yesOrno;
 	if (1.0 * (curr_time - prev_time) / CLOCKS_PER_SEC > 1.0) {
+
+		if (over) {
+			printf("Game is over and your game score is %d.\n", score);
+			printf("Do you want another game? (y/n) ");
+			scanf(" %c", &yesOrno);
+			if (yesOrno == 'y') {
+				over = false;
+				newGame();
+			}
+			else {
+				exit(0);
+			}
+		}
+
+		for (int i = 0; i < 4; i++) {
+			if ((yAxis[i] < 10 && yAxis[i] >= 0) && stack[xAxis[i] + 2][yAxis[i] - 1][abs(zAxis[i]-2)]) {
+				check = true;
+				break;
+			}
+		}
+
 		// Updated the block to make it go down ... 
-		/*if (model_state.pos[1] == -1.0f + (box_cell * 10) + (box_cell / 2)) {
-			coor.yMax += 10;
-			coor.yMin += 10;
-		}*/
-		/*if (model_state.pos[1] - box_cell > min_y) {
+		if (model_state.pos[1] > min_y + box_cell && !check) {
 			model_state.pos[1] -= box_cell;
-			coor.yMax--;
-			coor.yMin--;
-		}*/
+			for (int i = 0; i < 4; i++)
+				yAxis[i] -= 1;
+		}
+		else {
 			
-		glutPostRedisplay();
-		prev_time = curr_time;
+			for (int i = 0; i < 4; i++) {
+				if (xAxis[i]+2 >= 0 && xAxis[i]+2 < 5 && yAxis[i] >= 0 && yAxis[i] < 10 && abs(zAxis[i]-2) >= 0 && abs(zAxis[i] - 2) < 5)
+					stack[xAxis[i]+2][yAxis[i]][abs(zAxis[i]-2)] = true;
+			}
+			if (!over)
+				modelStateInit();
+
+		}
+
+		
+		for (int y = 0; y < 10; y++) {
+			bool s[5][5] = { false };
+			for (int x = 0; x < 5; x++) {
+				for (int z = 0; z < 5; z++) {
+					if (stack[x][y][z])
+						s[x][z] = true;
+				}
+			}
+			bool c = true;
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 5; j++) {
+					if (!s[i][j]) {
+						c = false;
+						break;
+					}
+				}
+				if (!c)
+					break;
+			}
+			if (c) {
+				score++;
+				clearPlane();
+			}
+			else
+				break;
+		}
+
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				if (stack[i][9][j]) {
+					over = true;
+					break;
+				}
+			}
+			if (over)
+				break;
+		}
+
+		if (!over) {
+			glutPostRedisplay();
+			prev_time = curr_time;
+		}
 	}
 }
 
@@ -398,6 +785,11 @@ void main(int argc, char** argv)
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 		exit(EXIT_FAILURE);
 	}
+
+	srand(time(NULL));
+
+	idx_selected = rand() % 4 + 1;
+	modelStateInit();
 
 	init();
 	glutDisplayFunc(display);
